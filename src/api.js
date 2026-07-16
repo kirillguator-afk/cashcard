@@ -1,36 +1,48 @@
 
 import { state } from './state.js';
 
-// Имитация API запросов (здесь в будущем будет fetch к вашему серверу)
 export const API = {
     async getRooms() {
-        // В реальности: return fetch('/api/rooms').then(r => r.json());
-        // Сейчас: имитируем живые комнаты
-        return [
-            { id: 101, creator: 'Ivan', bet: 100, players: 1, maxPlayers: 2, game: 'durak' },
-            { id: 102, creator: 'Nexus_Bot', bet: 50, players: 1, maxPlayers: 2, game: 'durak' }
-        ];
+        // Имитация задержки сети
+        await new Promise(r => setTimeout(r, 500));
+        return state.rooms;
     },
 
     async createRoom(gameType, bet) {
         if (state.user.balance < bet) throw new Error('Недостаточно средств');
         
-        const roomData = {
-            type: 'create_room',
-            game: gameType,
+        const newRoom = {
+            id: Math.floor(1000 + Math.random() * 9000),
+            creator: state.user.username,
             bet: bet,
-            user_id: state.user.id
+            players: 1,
+            maxPlayers: 2,
+            game: gameType,
+            status: 'waiting',
+            createdAt: new Date().toISOString()
         };
 
-        // Отправка данных боту (бот получит это событие)
-        window.Telegram.WebApp.sendData(JSON.stringify(roomData));
+        state.rooms.unshift(newRoom);
+        state.updateBalance(-bet);
+        state.save();
+
+        // Отправка боту для рассылки всем игрокам
+        if (window.Telegram?.WebApp) {
+            window.Telegram.WebApp.sendData(JSON.stringify({
+                action: 'new_room',
+                room: newRoom
+            }));
+        }
         
-        return { success: true, roomId: Math.floor(Math.random() * 1000) };
+        return { success: true, room: newRoom };
     },
 
     async joinRoom(roomId) {
-        console.log('Joining room:', roomId);
-        // Логика входа
+        const room = state.rooms.find(r => r.id === roomId);
+        if (!room) throw new Error('Комната не найдена');
+        if (state.user.balance < room.bet) throw new Error('Недостаточно средств для входа');
+        
+        // В реальности здесь проверка на сервере
         return { success: true };
     }
 };

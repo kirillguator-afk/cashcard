@@ -4,13 +4,18 @@ export const state = {
         id: 0,
         username: 'Guest',
         balance: 1000.00,
+        stats: {
+            wins: 12,
+            losses: 5,
+            totalGames: 17,
+            level: 3,
+            xp: 450,
+            nextLevelXp: 1000
+        }
     },
-    activeRoom: null,
-    rooms: [],
-    games: [
-        { id: 'durak', name: 'Дурак PVP', icon: 'fa-clone', color: 'bg-purple-600', multiplayer: true },
-        { id: 'crash', name: 'Crash', icon: 'fa-chart-line', color: 'bg-red-500', multiplayer: false },
-        { id: 'blackjack', name: 'Blackjack', icon: 'fa-suit-spade', color: 'bg-blue-600', multiplayer: false },
+    rooms: [
+        { id: 101, creator: 'Ivan_Crypto', bet: 100, players: 1, maxPlayers: 2, game: 'durak', status: 'waiting' },
+        { id: 102, creator: 'DegenKing', bet: 500, players: 1, maxPlayers: 2, game: 'durak', status: 'waiting' }
     ],
     
     listeners: [],
@@ -21,12 +26,31 @@ export const state = {
         this.save();
         this.notify();
     },
+
+    addXp(amount) {
+        this.user.stats.xp += amount;
+        if (this.user.stats.xp >= this.user.stats.nextLevelXp) {
+            this.user.stats.level++;
+            this.user.stats.xp -= this.user.stats.nextLevelXp;
+        }
+        this.save();
+        this.notify();
+    },
     
     notify() { this.listeners.forEach(fn => fn(this.user)); },
-    save() { localStorage.setItem('nexus_user_data', JSON.stringify(this.user)); },
+    
+    save() { 
+        localStorage.setItem('nexus_user_data', JSON.stringify(this.user));
+        localStorage.setItem('nexus_rooms', JSON.stringify(this.rooms));
+    },
+    
     load() {
-        const saved = localStorage.getItem('nexus_user_data');
-        if (saved) this.user = JSON.parse(saved);
+        const savedUser = localStorage.getItem('nexus_user_data');
+        if (savedUser) this.user = JSON.parse(savedUser);
+        
+        const savedRooms = localStorage.getItem('nexus_rooms');
+        if (savedRooms) this.rooms = JSON.parse(savedRooms);
+        
         this.notify();
     }
 };
