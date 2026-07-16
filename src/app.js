@@ -46,6 +46,8 @@ class Router {
 window.router = new Router();
 tg.ready();
 tg.expand();
+
+// Настройка стилей TG
 tg.headerColor = '#0f172a';
 tg.backgroundColor = '#0f172a';
 
@@ -55,8 +57,22 @@ state.subscribe((user) => {
     const nameEl = document.getElementById('user-name');
     if (nameEl) nameEl.innerText = user.username;
     const avatarEl = document.getElementById('user-avatar');
-    if (avatarEl) avatarEl.innerText = user.username[0].toUpperCase();
+    if (avatarEl) {
+        if (user.photo_url) {
+            avatarEl.innerHTML = `<img src="${user.photo_url}" class="w-full h-full object-cover rounded-2xl">`;
+        } else {
+            avatarEl.innerText = user.username[0].toUpperCase();
+        }
+    }
 });
+
+// Синхронизация данных с Telegram
+if (tg.initDataUnsafe?.user) {
+    const u = tg.initDataUnsafe.user;
+    state.user.username = u.username || u.first_name;
+    state.user.id = u.id;
+    state.user.photo_url = u.photo_url || null; // TG может не отдавать photo_url без бот-токена
+}
 
 state.load();
 router.handleRoute();
