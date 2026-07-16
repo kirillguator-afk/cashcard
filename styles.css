@@ -8,71 +8,51 @@ body {
     background-color: var(--tg-theme-bg-color);
     color: white;
     -webkit-tap-highlight-color: transparent;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 
-.glass {
-    background: rgba(15, 23, 42, 0.6);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+.glass { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+.glass-dark { background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px); }
+
+/* Haptic Active State for buttons */
+button:active { transform: scale(0.96); }
+
+/* Navigation */
+.nav-btn { @apply flex flex-col items-center justify-center text-white/40 transition-all duration-300 relative; }
+.nav-btn.active { @apply text-blue-500 scale-110; }
+.nav-btn.active::after { content: ''; @apply absolute -bottom-1 w-1 h-1 bg-blue-500 rounded-full shadow-[0_0_10px_#3b82f6]; }
+
+/* Mines & Cards Glow */
+.card-active { box-shadow: 0 0 20px rgba(59, 130, 246, 0.4); border: 1px solid rgba(59, 130, 246, 0.5); }
+
+/* Gold Shimmer */
+.gold-shimmer {
+    background: linear-gradient(45deg, #f59e0b, #fbbf24, #f59e0b);
+    background-size: 200% 200%;
+    animation: shimmer 3s infinite;
 }
 
-.glass-dark {
-    background: rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(30px);
-    -webkit-backdrop-filter: blur(30px);
+/* Skeleton Loading */
+.skeleton {
+    background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.03) 75%);
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s infinite;
 }
 
-/* Bottom Navigation Buttons */
-.nav-btn {
-    @apply flex flex-col items-center justify-center text-white/40 transition-all duration-300 relative;
+@keyframes skeleton-loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
 }
 
-.nav-btn i {
-    @apply text-xl mb-1;
+@keyframes shimmer {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
 }
 
-.nav-btn span {
-    @apply text-[10px] font-black uppercase tracking-[0.1em];
-}
-
-.nav-btn.active {
-    @apply text-blue-500 scale-110;
-}
-
-.nav-btn.active::after {
-    content: '';
-    @apply absolute -bottom-1 w-1 h-1 bg-blue-500 rounded-full shadow-[0_0_10px_#3b82f6];
-}
-
-/* Scrollbar Customization */
-::-webkit-scrollbar {
-    width: 0px;
-}
-
-/* Animations */
 @keyframes slide-up {
     from { opacity: 0; transform: translateY(20px); }
     to { opacity: 1; transform: translateY(0); }
 }
 
-.animate-slide-up {
-    animation: slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-@keyframes pulse-soft {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
-}
-
-.pulse-soft {
-    animation: pulse-soft 2s infinite ease-in-out;
-}
-
-/* Card Visuals */
-.card-shadow {
-    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-}
-
-.text-glow {
-    text-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
-}
+.animate-slide-up { animation: slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
