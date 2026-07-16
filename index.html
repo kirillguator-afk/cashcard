@@ -1,0 +1,65 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Nexus Casino TWA</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            background-color: var(--tg-theme-bg-color, #0f172a);
+            color: var(--tg-theme-text-color, #ffffff);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            overflow-x: hidden;
+        }
+        .tg-secondary-bg { background-color: var(--tg-theme-secondary-bg-color, #1e293b); }
+        .tg-button { background-color: var(--tg-theme-button-color, #3b82f6); color: var(--tg-theme-button-text-color, #ffffff); }
+        .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); }
+        .active-tab { color: var(--tg-theme-button-color, #3b82f6); border-top: 2px solid var(--tg-theme-button-color, #3b82f6); }
+        #game-canvas { width: 100%; height: 300px; border-radius: 1rem; background: #000; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+    <!-- Header -->
+    <header class="p-4 flex justify-between items-center sticky top-0 z-50 glass border-b border-white/10">
+        <div class="flex items-center gap-2">
+            <div id="user-avatar" class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center font-bold text-sm">?</div>
+            <span id="user-name" class="font-medium text-sm">Игрок</span>
+        </div>
+        <div class="bg-black/30 px-3 py-1.5 rounded-full flex items-center gap-2 border border-yellow-500/30">
+            <span class="text-yellow-500 font-bold">₽</span>
+            <span id="balance-display" class="font-mono">0.00</span>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main id="app" class="flex-grow p-4 pb-24">
+        <!-- Content will be injected here -->
+    </main>
+
+    <!-- Navigation -->
+    <nav class="fixed bottom-0 left-0 right-0 tg-secondary-bg border-t border-white/10 flex justify-around p-2 z-50">
+        <button onclick="router.navigate('home')" class="nav-item flex flex-col items-center p-2 gap-1">
+            <i class="fas fa-home text-xl"></i>
+            <span class="text-[10px]">Главная</span>
+        </button>
+        <button onclick="router.navigate('games')" class="nav-item flex flex-col items-center p-2 gap-1">
+            <i class="fas fa-gamepad text-xl"></i>
+            <span class="text-[10px]">Игры</span>
+        </button>
+        <button onclick="router.navigate('wallet')" class="nav-item flex flex-col items-center p-2 gap-1">
+            <i class="fas fa-wallet text-xl"></i>
+            <span class="text-[10px]">Кошелек</span>
+        </button>
+        <button onclick="router.navigate('profile')" class="nav-item flex flex-col items-center p-2 gap-1">
+            <i class="fas fa-user text-xl"></i>
+            <span class="text-[10px]">Профиль</span>
+        </button>
+    </nav>
+
+    <script type="module" src="src/app.js"></script>
+</body>
+</html>
