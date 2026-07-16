@@ -1,48 +1,49 @@
 
 import { state } from '../state.js';
+import { triggerHaptic, formatValue } from '../utils.js';
 
 export class BlackjackGame {
     constructor() {
         this.deck = [];
         this.playerHand = [];
         this.dealerHand = [];
-        this.bet = 10;
-        this.gameState = 'betting'; // betting, playing, ended
+        this.bet = 100;
+        this.isPlaying = false;
     }
 
     render() {
         const container = document.getElementById('app');
         container.innerHTML = `
-            <div class="flex flex-col gap-4 h-full">
-                <div class="flex items-center gap-2" onclick="router.navigate('games')">
-                    <i class="fas fa-arrow-left"></i>
-                    <span class="font-bold">Блэкджек</span>
+            <div class="h-full flex flex-col bg-[#0f172a] p-6 space-y-8 animate-slide-up">
+                <div class="flex items-center gap-3" onclick="router.navigate('home')">
+                    <i class="fas fa-chevron-left text-blue-500"></i>
+                    <span class="font-black uppercase tracking-widest text-sm">Blackjack</span>
                 </div>
 
-                <div class="flex-grow flex flex-col justify-around py-4">
-                    <!-- Dealer -->
-                    <div class="text-center">
-                        <div class="text-xs text-white/40 mb-2 uppercase tracking-widest">Дилер</div>
-                        <div id="dealer-cards" class="flex justify-center gap-2 min-h-[100px]"></div>
-                        <div id="dealer-score" class="mt-2 font-bold text-yellow-500"></div>
+                <div class="flex-grow flex flex-col justify-around bg-white/5 rounded-[3rem] border border-white/5 p-4 shadow-inner">
+                    <div class="text-center space-y-4">
+                        <div class="text-[10px] font-black uppercase opacity-20 tracking-widest">Дилер</div>
+                        <div id="dealer-cards" class="flex justify-center gap-2 min-h-[110px]"></div>
+                        <div id="dealer-score" class="text-xs font-black text-blue-500"></div>
                     </div>
 
-                    <!-- Player -->
-                    <div class="text-center">
-                        <div id="player-score" class="mb-2 font-bold text-yellow-500"></div>
-                        <div id="player-cards" class="flex justify-center gap-2 min-h-[100px]"></div>
-                        <div class="text-xs text-white/40 mt-2 uppercase tracking-widest">Вы</div>
+                    <div class="h-px bg-white/5 mx-10"></div>
+
+                    <div class="text-center space-y-4">
+                        <div id="player-score" class="text-xs font-black text-blue-500"></div>
+                        <div id="player-cards" class="flex justify-center gap-2 min-h-[110px]"></div>
+                        <div class="text-[10px] font-black uppercase opacity-20 tracking-widest">Вы</div>
                     </div>
                 </div>
 
-                <div id="bj-controls" class="tg-secondary-bg p-4 rounded-3xl">
-                    <div id="betting-ui" class="space-y-4">
-                         <input type="number" id="bj-bet-input" value="${this.bet}" class="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 font-mono">
-                         <button id="start-bj" class="w-full bg-blue-600 py-4 rounded-2xl font-bold">РАЗДАТЬ</button>
+                <div id="bj-controls" class="space-y-4">
+                    <div id="betting-ui" class="bg-white/5 border border-white/10 p-6 rounded-[2.5rem] space-y-4">
+                         <input type="number" id="bj-bet-input" value="${this.bet}" class="w-full bg-black/40 border border-white/5 rounded-2xl px-6 py-4 font-black text-xl focus:outline-none">
+                         <button id="start-bj" class="w-full bg-blue-600 py-5 rounded-2xl font-black uppercase tracking-widest shadow-xl shadow-blue-600/20">Раздать карты</button>
                     </div>
                     <div id="action-ui" class="hidden grid grid-cols-2 gap-4">
-                        <button id="hit-btn" class="bg-green-600 py-4 rounded-2xl font-bold">ЕЩЕ</button>
-                        <button id="stand-btn" class="bg-orange-500 py-4 rounded-2xl font-bold">СТОП</button>
+                        <button id="hit-btn" class="bg-blue-600 py-6 rounded-[2rem] font-black uppercase tracking-widest shadow-xl">Еще</button>
+                        <button id="stand-btn" class="bg-orange-500 py-6 rounded-[2rem] font-black uppercase tracking-widest shadow-xl">Стоп</button>
                     </div>
                 </div>
             </div>
@@ -54,41 +55,28 @@ export class BlackjackGame {
         const suits = ['♠', '♣', '♥', '♦'];
         const values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
         this.deck = [];
-        for (let s of suits) {
-            for (let v of values) {
-                this.deck.push({suit: s, value: v});
-            }
-        }
+        for (let s of suits) for (let v of values) this.deck.push({suit: s, value: v});
         this.deck = this.deck.sort(() => Math.random() - 0.5);
     }
 
     getScore(hand) {
-        let score = 0;
-        let aces = 0;
+        let score = 0, aces = 0;
         for (let card of hand) {
-            if (card.value === 'A') {
-                aces++;
-                score += 11;
-            } else if (['J', 'Q', 'K'].includes(card.value)) {
-                score += 10;
-            } else {
-                score += parseInt(card.value);
-            }
+            if (card.value === 'A') { aces++; score += 11; }
+            else if (['J', 'Q', 'K'].includes(card.value)) score += 10;
+            else score += parseInt(card.value);
         }
-        while (score > 21 && aces > 0) {
-            score -= 10;
-            aces--;
-        }
+        while (score > 21 && aces > 0) { score -= 10; aces--; }
         return score;
     }
 
     renderCard(card, hidden = false) {
-        const color = (card.suit === '♥' || card.suit === '♦') ? 'text-red-500' : 'text-white';
-        if (hidden) return `<div class="w-16 h-24 bg-indigo-900 rounded-lg border-2 border-white/20 flex items-center justify-center">?</div>`;
+        if (hidden) return `<div class="w-16 h-24 bg-gradient-to-br from-indigo-900 to-black rounded-xl border border-white/20 shadow-2xl"></div>`;
+        const isRed = card.suit === '♥' || card.suit === '♦';
         return `
-            <div class="w-16 h-24 bg-white rounded-lg border-2 border-gray-200 flex flex-col items-center justify-center ${color} shadow-lg animate-fade-in">
-                <div class="text-lg font-bold">${card.value}</div>
-                <div class="text-2xl">${card.suit}</div>
+            <div class="w-16 h-24 bg-white rounded-xl shadow-2xl flex flex-col items-center justify-center border-2 border-gray-200 animate-slide-up">
+                <div class="text-xl font-black ${isRed ? 'text-red-500' : 'text-black'}">${card.value}</div>
+                <div class="text-2xl ${isRed ? 'text-red-500' : 'text-black'}">${card.suit}</div>
             </div>
         `;
     }
@@ -103,8 +91,10 @@ export class BlackjackGame {
         const betAmount = parseFloat(document.getElementById('bj-bet-input').value);
         if (betAmount > state.user.balance || betAmount <= 0) return alert('Недостаточно средств');
         
+        triggerHaptic('medium');
         this.bet = betAmount;
         state.updateBalance(-this.bet);
+        state.incrementGameCount('blackjack');
         
         this.createDeck();
         this.playerHand = [this.deck.pop(), this.deck.pop()];
@@ -118,18 +108,19 @@ export class BlackjackGame {
     updateUI(showDealer = false) {
         document.getElementById('player-cards').innerHTML = this.playerHand.map(c => this.renderCard(c)).join('');
         document.getElementById('dealer-cards').innerHTML = this.dealerHand.map((c, i) => this.renderCard(c, !showDealer && i === 1)).join('');
-        
-        document.getElementById('player-score').innerText = this.getScore(this.playerHand);
-        document.getElementById('dealer-score').innerText = showDealer ? this.getScore(this.dealerHand) : '?';
+        document.getElementById('player-score').innerText = this.getScore(this.playerHand) + ' Очков';
+        document.getElementById('dealer-score').innerText = showDealer ? this.getScore(this.dealerHand) + ' Очков' : 'Счет скрыт';
     }
 
     hit() {
+        triggerHaptic('light');
         this.playerHand.push(this.deck.pop());
         this.updateUI();
-        if (this.getScore(this.playerHand) > 21) this.end('Dealer wins! (Bust)', 0);
+        if (this.getScore(this.playerHand) > 21) this.end('Перебор! Дилер победил', 0);
     }
 
     async stand() {
+        triggerHaptic('medium');
         let dealerScore = this.getScore(this.dealerHand);
         while (dealerScore < 17) {
             this.dealerHand.push(this.deck.pop());
@@ -139,19 +130,18 @@ export class BlackjackGame {
         }
         
         const playerScore = this.getScore(this.playerHand);
-        if (dealerScore > 21 || playerScore > dealerScore) {
-            this.end('You win!', this.bet * 2);
-        } else if (playerScore < dealerScore) {
-            this.end('Dealer wins!', 0);
-        } else {
-            this.end('Push!', this.bet);
-        }
+        if (dealerScore > 21 || playerScore > dealerScore) this.end('Вы победили!', this.bet * 2);
+        else if (playerScore < dealerScore) this.end('Дилер победил!', 0);
+        else this.end('Ничья!', this.bet);
     }
 
     end(msg, winAmount) {
         this.updateUI(true);
-        state.updateBalance(winAmount);
-        alert(msg);
-        this.render(); // Reset UI
+        state.updateBalance(winAmount, winAmount > 0);
+        triggerHaptic(winAmount > 0 ? 'heavy' : 'medium');
+        setTimeout(() => {
+            alert(msg);
+            this.render();
+        }, 500);
     }
 }
